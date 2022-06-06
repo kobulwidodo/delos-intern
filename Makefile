@@ -2,11 +2,11 @@ BINARY=engine
 engine:
 	go build -o ${BINARY} app/*.go
 
-docker:
-	docker build -t delos-intern .
-
-run:
+run-db:
 	docker-compose up --build -d
+
+run-app:
+	go run app/http.go
 
 stop:
 	docker-compose down
