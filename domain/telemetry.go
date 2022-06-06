@@ -33,6 +33,7 @@ type CreateTelemetryDto struct {
 
 type CountResponse struct {
 	Endpoint   string `json:"endpoint"`
+	Method     string `json:"method"`
 	Count      int    `json:"count"`
 	UniqueUser int    `json:"unique_user"`
 }

@@ -31,7 +31,7 @@ func (r *TelemetryRepository) GetAll() ([]domain.Telemetry, error) {
 
 func (r *TelemetryRepository) GetCount() ([]domain.CountResponse, error) {
 	var responses []domain.CountResponse
-	if err := r.db.Model(&domain.Telemetry{}).Select("endpoint", "count(*) as count", "count(DISTINCT ip) as unique_user").Group("endpoint").Find(&responses).Error; err != nil {
+	if err := r.db.Model(&domain.Telemetry{}).Select("endpoint", "method", "count(*) as count", "count(DISTINCT ip) as unique_user").Group("endpoint").Group("method").Find(&responses).Error; err != nil {
 		return responses, err
 	}
 	return responses, nil
