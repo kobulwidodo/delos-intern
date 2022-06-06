@@ -31,4 +31,4 @@ $ make run-app
 ## Endpoint Documentation
 Postman : https://documenter.getpostman.com/view/14494329/Uz5JHFBj
 ## Bug Found
-- test failed to run because mysql >= 200ms when truncate table executed
+- sometimes test failed to run because mysql >= 200ms when truncate table executed
