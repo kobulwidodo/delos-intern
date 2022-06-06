@@ -1,12 +1,30 @@
 version: "3.9"
 services:
-  postgis:
+  db:
     image: postgres:13
+    container_name: postgresqldb
     volumes:
-      - ./data/postgis:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: template
-      POSTGRES_DB: go-template
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5434:5432"
+      - "5432:5432"
+
+  web:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: delos-intern-api
+    restart: on-failure
+    depends_on:
+      - db
+    networks:
+      - default
+    ports:
+      - 8080:8080
+    volumes:
+      - ./config.json:/app/config.json
