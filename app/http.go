@@ -2,59 +2,52 @@ package main
 
 import (
 	"fmt"
-	"go-template/domain"
-	_userHttpHandler "go-template/user/delivery/http"
-	_userRepository "go-template/user/repository/postgresql"
-	_userUsecase "go-template/user/usecase"
+	_farmHttpHandler "go-template/farm/delivery/http"
+	_farmRepository "go-template/farm/repository/postgresql"
+	_farmUsecase "go-template/farm/usecase"
+	"go-template/infrastructure"
+	"go-template/middleware"
+	_pondHttpHandler "go-template/pond/delivery/http"
+	_pondRepository "go-template/pond/repository/postgresql"
+	_pondUsecase "go-template/pond/usecase"
+	_telemetryHttpHandler "go-template/telemetry/delivery/http"
+	_telemetryRepository "go-template/telemetry/repository/postgresql"
+	_telemetryUsecase "go-template/telemetry/usecase"
 	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal("failed to load env")
-		panic(err)
+		fmt.Println("failed to load env")
 	}
 
-	db, err := initDb()
+	dbDriver := infrastructure.NewDbConfig()
+
+	db, err := dbDriver.InitDb()
 	if err != nil {
 		log.Fatal("failed to connect with database")
 		panic(err)
 	}
 	r := gin.Default()
 	api := r.Group("/api")
+	telemetryRepository := _telemetryRepository.NewTelemetryRepository(db)
+	telemetryUsecase := _telemetryUsecase.NewTelemetryRepository(telemetryRepository)
+	telemetryMiddleware := middleware.NewTelemetryMiddleware(telemetryUsecase)
 
-	userRepository := _userRepository.NewUserRepository(db)
+	api.Use(telemetryMiddleware.Telemetry())
 
-	userUseCase := _userUsecase.NewUserUseCase(userRepository)
+	farmRepository := _farmRepository.NewFarmRepository(db)
+	pondRepository := _pondRepository.NewPondRepository(db)
 
-	_userHttpHandler.NewUserHandler(api, userUseCase)
+	farmUsecase := _farmUsecase.NewFarmUsecase(farmRepository)
+	pondUsecase := _pondUsecase.NewPondUsecase(pondRepository)
+
+	_farmHttpHandler.NewFarmHandler(api, farmUsecase)
+	_pondHttpHandler.NewPondHandler(api, pondUsecase)
+	_telemetryHttpHandler.NewTelemetryHandler(api, telemetryUsecase)
 
 	r.Run()
-}
-
-func initDb() (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_PASS"),
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_PORT"),
-	)
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return db, err
-	}
-
-	if err := db.AutoMigrate(&domain.User{}); err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }
