@@ -11,20 +11,3 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
-
-  web:
-    env_file:
-      - .env
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: delos-intern-api
-    restart: on-failure
-    depends_on:
-      - db
-    networks:
-      - default
-    ports:
-      - 8080:8080
-    volumes:
-      - ./config.json:/app/config.json
