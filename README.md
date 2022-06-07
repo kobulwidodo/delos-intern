@@ -6,6 +6,8 @@
 - Mock : Mockery
 - Testing : Testify
 ## Architecture
+![Diagram](https://user-images.githubusercontent.com/53964878/172319411-468d8866-f2c6-4026-a371-b8e47714ed97.png)
+
 This Project has 4 Domain layer :
 - Models
 - Repository
@@ -15,6 +17,12 @@ This Project has 4 Domain layer :
 Repository -> Usecase -> Handler
 ## How to run this project
 ```bash
+# Clone project
+$ git clone https://github.com/kobulwidodo/delos-intern.git
+
+# Move to project
+$ cd delos-intern
+
 # Build Database with compose
 $ make run-db
 
